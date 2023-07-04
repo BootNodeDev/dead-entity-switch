@@ -6,9 +6,8 @@ import {DefaultAccount } from "./lib/DefaultAccount.sol";
 import { DeadEntitySwitch } from "./DeadEntitySwitch.sol";
 
 contract DESAccount is DefaultAccount, DeadEntitySwitch {
-    // Hook into DefaultAccount execute/validate/etc.
 
-    constructor(address _beneficiary, address _owner) DeadEntitySwitch(address(this)) public {}
+    constructor() DeadEntitySwitch(address(this)) public {}
 
     /// @notice Validation that the ECDSA signature of the transaction is correct.
     /// @param _hash The hash of the transaction to be signed.
