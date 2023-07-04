@@ -1,56 +1,82 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-// 1. Move 365 days to var & setter
-// 2. Events
-
 contract DeadEntitySwitch {
-    address public owner;
-    address public beneficiary;
-    uint256 public dateStarted;
-    uint256 public claimTimeout = 365 days;
+  address public owner;
+  address public beneficiary;
+  uint256 public dateStarted;
+  uint256 public claimTimeout = 365 days;
 
-    constructor(address _owner) {
-        owner = _owner;
+  event BeneficiaryChanged(address beneficiary);
+  event TimeoutChanged(uint timeout);
+  event TimeoutReset();
+  event ClaimInitiated(uint256 date, address beneficiary);
+  event ClaimFinished(uint256 date, address beneficiary);
+
+  error OwnerRequired();
+  error BeneficiaryRequired();
+  error ClaimNotStarted();
+  error TimeoutTooShort();
+  error TimeoutNotFinished();
+
+  constructor(address _owner) {
+    owner = _owner;
+  }
+
+  function setBeneficiary(address _beneficiary) public {
+    if (owner != msg.sender) {
+      revert OwnerRequired();
+    }
+    beneficiary = _beneficiary;
+
+    emit BeneficiaryChanged(_beneficiary);
+  }
+
+  function setClaimTimeout(uint256 _timeout) public {
+    if (owner != msg.sender) {
+      revert OwnerRequired();
+    }
+    if (_timeout < 7 days) {
+      revert TimeoutTooShort();
     }
 
-    function setBeneficiary(address _beneficiary) public {
-        require(owner == msg.sender, "");
-        beneficiary = _beneficiary;
-        // emit event
+    claimTimeout = _timeout;
+
+    emit TimeoutChanged(_timeout);
+  }
+
+  function heartBeat() public {
+    if (dateStarted == 0) {
+      revert ClaimNotStarted();
+    }
+    if (owner != msg.sender) {
+      revert OwnerRequired();
     }
 
-    function setClaimTimeout(uint256 _timeout) public {
-        require(owner == msg.sender, "");
-        require(_timeout >= 7 days, "");
+    dateStarted = 0;
 
-        claimTimeout = _timeout;
+    emit TimeoutReset();
+  }
+
+  function initClaim() public {
+    if (msg.sender != beneficiary) {
+      revert BeneficiaryRequired();
     }
 
-    function heartBeat() public {
-        require(dateStarted != 0, "");
-        require(owner == msg.sender, "");
+    dateStarted = block.timestamp;
 
-        dateStarted = 0;
-        // emit event
+    emit ClaimInitiated(dateStarted, beneficiary);
+  }
+
+  function finishClaim() public {
+    if ((dateStarted + claimTimeout) >= block.timestamp) {
+      revert TimeoutNotFinished();
     }
 
-    function initClaim() public   {
-        require(msg.sender == beneficiary, "");
+    owner = beneficiary;
+    dateStarted = 0;
+    beneficiary = address(0);
 
-        dateStarted = block.timestamp;
-        // notify user with event emit
-    }
-
-    function finishClaim() public   {
-        // TODO extract 1 year to var
-        require((dateStarted + claimTimeout) < block.timestamp, "");
-
-        owner = beneficiary;
-        dateStarted = 0;
-        beneficiary = address(0);
-        // emit event
-
-    }
-
+    emit ClaimFinished(block.timestamp, owner);
+  }
 }
