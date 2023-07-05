@@ -129,7 +129,7 @@ contract DefaultAccount is IAccount {
 
     /// @notice Inner method for executing a transaction.
     /// @param _transaction The transaction to execute.
-    function _execute(Transaction calldata _transaction) internal {
+    function _execute(Transaction calldata _transaction) internal virtual {
         address to = address(uint160(_transaction.to));
         uint128 value = Utils.safeCastToU128(_transaction.value);
         bytes calldata data = _transaction.data;

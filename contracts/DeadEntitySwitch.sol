@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 contract DeadEntitySwitch {
   uint256 constant MIN_TIMEOUT = 5 minutes;
+
   address public owner;
   address public beneficiary;
   uint256 public dateStarted;
@@ -48,7 +49,8 @@ contract DeadEntitySwitch {
 
   function heartBeat() public {
     if (dateStarted == 0) {
-      revert ClaimNotStarted();
+      return;
+      // FIXME revert ClaimNotStarted();
     }
     if (owner != msg.sender) {
       revert OwnerRequired();

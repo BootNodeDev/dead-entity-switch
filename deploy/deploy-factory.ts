@@ -20,12 +20,9 @@ export default async function (hre: HardhatRuntimeEnvironment) {
   const factoryArtifact = await deployer.loadArtifact("DESAccountFactory");
   const aaArtifact = await deployer.loadArtifact("DESAccount");
 
-  // Getting the bytecodeHash of the account
-  const bytecodeHash = utils.hashBytecode(aaArtifact.bytecode);
-
   const factory = await deployer.deploy(
     factoryArtifact,
-    [bytecodeHash],
+    [utils.hashBytecode(aaArtifact.bytecode)],
     undefined,
     [aaArtifact.bytecode]
   );
