@@ -30,18 +30,23 @@ export default async function (hre: HardhatRuntimeEnvironment) {
   // TODO change salt
   const salt = ethers.constants.HashZero;
 
+  const beneficiary = Wallet.createRandom();
+  const owner = Wallet.createRandom();
+
+  const ownerAddress = owner.address;
   // deploy account
-  const tx = await aaFactory.connect(deployer.zkWallet).deployAccount(salt);
+  const tx = await aaFactory
+    .connect(deployer.zkWallet)
+    .deployAccount(salt, ownerAddress);
   await tx.wait();
 
-  const beneficiary = Wallet.createRandom();
-  // const abiCoder = new ethers.utils.AbiCoder();
+  //   const abiCoder = new ethers.utils.AbiCoder();
 
   //   const desaAddress = utils.create2Address(
   //     FACTORY_ADDRESS,
   //     await aaFactory.aaBytecodeHash(),
   //     salt,
-  //     ""
+  //     abiCoder.encode(["address"], [ownerAddress])
   //   );
   //   console.log(`dead entity switch account deployed on address ${desaAddress}`);
 }

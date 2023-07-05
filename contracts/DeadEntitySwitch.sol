@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 contract DeadEntitySwitch {
+  uint256 constant MIN_TIMEOUT = 5 minutes;
   address public owner;
   address public beneficiary;
   uint256 public dateStarted;
@@ -36,7 +37,7 @@ contract DeadEntitySwitch {
     if (owner != msg.sender) {
       revert OwnerRequired();
     }
-    if (_timeout < 7 days) {
+    if (_timeout < MIN_TIMEOUT) {
       revert TimeoutTooShort();
     }
 
