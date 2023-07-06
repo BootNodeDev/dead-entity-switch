@@ -1,5 +1,4 @@
 import { Wallet, utils } from "zksync-web3";
-import * as ethers from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 
@@ -8,13 +7,12 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // load wallet private key from env file
-const PRIVATE_KEY = process.env.PK || "";
+const PK_OWNER = process.env.PK_OWNER || "";
 
-if (!PRIVATE_KEY)
-  throw "⛔️ Private key not detected! Add it to the .env file!";
+if (!PK_OWNER) throw "⛔️ Private key not detected! Add it to the .env file!";
 
 export default async function (hre: HardhatRuntimeEnvironment) {
-  const wallet = new Wallet(PRIVATE_KEY);
+  const wallet = new Wallet(PK_OWNER);
 
   const deployer = new Deployer(hre, wallet);
   const factoryArtifact = await deployer.loadArtifact("DESAccountFactory");

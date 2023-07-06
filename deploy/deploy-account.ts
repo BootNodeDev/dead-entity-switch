@@ -1,16 +1,14 @@
-import { utils, Wallet, Provider, EIP712Signer, types } from "zksync-web3";
+import { utils, Wallet, Provider } from "zksync-web3";
 import * as ethers from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 // load env file
 import dotenv from "dotenv";
-import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 dotenv.config();
 
 // load wallet private key from env file
-const PRIVATE_KEY = process.env.PK || "";
-if (!PRIVATE_KEY)
-  throw "⛔️ Private key not detected! Add it to the .env file!";
+const PK_OWNER = process.env.PK_OWNER || "";
+if (!PK_OWNER) throw "⛔️ Private key not detected! Add it to the .env file!";
 
 const FACTORY_ADDRESS = process.env.FACTORY || "";
 if (!FACTORY_ADDRESS)
@@ -19,7 +17,7 @@ if (!FACTORY_ADDRESS)
 export default async function (hre: HardhatRuntimeEnvironment) {
   const provider = new Provider("https://testnet.era.zksync.dev");
 
-  const wallet = new Wallet(PRIVATE_KEY).connect(provider);
+  const wallet = new Wallet(PK_OWNER).connect(provider);
   const factoryArtifact = await hre.artifacts.readArtifact("DESAccountFactory");
 
   const aaFactory = new ethers.Contract(
@@ -28,13 +26,9 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     wallet
   );
 
-  // TODO change salt
   const salt = ethers.constants.HashZero;
 
-  const beneficiary = Wallet.createRandom();
-  const owner = Wallet.createRandom();
-
-  const ownerAddress = owner.address;
+  const ownerAddress = wallet.address;
   // deploy account
   const tx = await aaFactory.deployAccount(salt, ownerAddress);
   await tx.wait();
