@@ -17,9 +17,10 @@ if (!FACTORY_ADDRESS)
   throw "⛔️ Factory address not detected! Add it to the .env file!";
 
 export default async function (hre: HardhatRuntimeEnvironment) {
-  const wallet = new Wallet(PRIVATE_KEY);
+  const provider = new Provider("https://testnet.era.zksync.dev");
+
+  const wallet = new Wallet(PRIVATE_KEY).connect(provider);
   const factoryArtifact = await hre.artifacts.readArtifact("DESAccountFactory");
-  const deployer = new Deployer(hre, wallet);
 
   const aaFactory = new ethers.Contract(
     FACTORY_ADDRESS,
@@ -35,18 +36,16 @@ export default async function (hre: HardhatRuntimeEnvironment) {
 
   const ownerAddress = owner.address;
   // deploy account
-  const tx = await aaFactory
-    .connect(deployer.zkWallet)
-    .deployAccount(salt, ownerAddress);
+  const tx = await aaFactory.deployAccount(salt, ownerAddress);
   await tx.wait();
 
-  //   const abiCoder = new ethers.utils.AbiCoder();
+  const abiCoder = new ethers.utils.AbiCoder();
 
-  //   const desaAddress = utils.create2Address(
-  //     FACTORY_ADDRESS,
-  //     await aaFactory.aaBytecodeHash(),
-  //     salt,
-  //     abiCoder.encode(["address"], [ownerAddress])
-  //   );
-  //   console.log(`dead entity switch account deployed on address ${desaAddress}`);
+  const desaAddress = utils.create2Address(
+    FACTORY_ADDRESS,
+    await aaFactory.aaBytecodeHash(),
+    salt,
+    abiCoder.encode(["address"], [ownerAddress])
+  );
+  console.log(`dead entity switch account deployed on address ${desaAddress}`);
 }
