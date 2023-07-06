@@ -20,6 +20,7 @@ export default async function (hre: HardhatRuntimeEnvironment) {
   const wallet = new Wallet(PK_OWNER).connect(provider);
   const factoryArtifact = await hre.artifacts.readArtifact("DESAccountFactory");
 
+  console.log(`Deploying new account with ${FACTORY_ADDRESS} factory...`);
   const aaFactory = new ethers.Contract(
     FACTORY_ADDRESS,
     factoryArtifact.abi,

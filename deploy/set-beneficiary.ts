@@ -43,9 +43,9 @@ export default async function (hre: HardhatRuntimeEnvironment) {
 
   setBeneficiaryTx = {
     ...setBeneficiaryTx,
-    from: owner.address,
+    from: DESA_ACCOUNT,
     chainId: (await provider.getNetwork()).chainId,
-    nonce: await provider.getTransactionCount(owner.address),
+    nonce: await provider.getTransactionCount(DESA_ACCOUNT),
     type: ZKSYNC_TX_TYPE,
     customData: {
       gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
@@ -67,11 +67,12 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     customSignature: signature,
   };
 
+  const oldBeneficiary = await desaAccount.beneficiary();
+
   const sentTx = await provider.sendTransaction(
     utils.serialize(setBeneficiaryTx)
   );
 
-  const oldBeneficiary = await desaAccount.beneficiary();
   console.log(
     `Setting beneficiary for account as ${beneficiary.address} (was ${oldBeneficiary})...`
   );

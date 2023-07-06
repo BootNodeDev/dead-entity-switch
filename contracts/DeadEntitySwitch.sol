@@ -27,7 +27,7 @@ contract DeadEntitySwitch {
   }
 
   function setBeneficiary(address _beneficiary) public {
-    if (owner != msg.sender) {
+    if (msg.sender != address(this)) {
       revert OwnerRequired();
     }
     beneficiary = _beneficiary;
@@ -36,7 +36,7 @@ contract DeadEntitySwitch {
   }
 
   function setClaimTimeout(uint256 _timeout) public {
-    if (owner != msg.sender) {
+    if (msg.sender != address(this)) {
       revert OwnerRequired();
     }
     if (_timeout < MIN_TIMEOUT) {
@@ -58,7 +58,7 @@ contract DeadEntitySwitch {
     if (dateStarted == 0) {
       revert ClaimNotStarted();
     }
-    if (owner != msg.sender) {
+    if (msg.sender != address(this)) {
       revert OwnerRequired();
     }
 
