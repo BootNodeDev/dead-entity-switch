@@ -17,6 +17,7 @@ contract DeadEntitySwitch {
 
   error OwnerRequired();
   error BeneficiaryRequired();
+  error ClaimAlreadyStarted();
   error ClaimNotStarted();
   error TimeoutTooShort();
   error TimeoutNotFinished();
@@ -65,6 +66,9 @@ contract DeadEntitySwitch {
   }
 
   function initClaim() public {
+    if (dateStarted != 0) {
+      revert ClaimAlreadyStarted();
+    }
     if (msg.sender != beneficiary) {
       revert BeneficiaryRequired();
     }
