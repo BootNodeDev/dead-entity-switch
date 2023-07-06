@@ -36,15 +36,19 @@ export default async function (hre: HardhatRuntimeEnvironment) {
   const aaArtifact = await hre.artifacts.readArtifact("DESAccount");
   const desaAccount = new Contract(DESA_ACCOUNT, aaArtifact.abi, beneficiary);
 
-  const oldDateStarted = await desaAccount.dateStarted();
+  await desaAccount.finishClaim();
 
-  console.log(`Claim already started?: ${oldDateStarted}`);
-  await desaAccount.initClaim();
+  const OldBeneficiaryAddress = await desaAccount.beneficiary();
+  const OldOwnerAddress = await desaAccount.owner();
+
+  console.log(`Finishing claim for beneficiary ${OldBeneficiaryAddress}...`);
 
   const beneficiaryAddress = await desaAccount.beneficiary();
-
-  console.log(`Starting claim for beneficiary ${beneficiaryAddress}...`);
-
-  const dateStarted = await desaAccount.dateStarted();
-  console.log(`Claim started at ${dateStarted}.`);
+  const ownerAddress = await desaAccount.owner();
+  console.log(
+    `Claim finished owner is ${ownerAddress} was ${OldOwnerAddress}.`
+  );
+  console.log(
+    `Claim finished beneficiary is ${beneficiary} was ${OldBeneficiaryAddress}.`
+  );
 }
