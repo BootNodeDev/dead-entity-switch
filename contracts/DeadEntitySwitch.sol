@@ -47,18 +47,21 @@ contract DeadEntitySwitch {
     emit TimeoutChanged(_timeout);
   }
 
+  function _heartBeat() internal {
+    dateStarted = 0;
+
+    emit TimeoutReset();
+  }
+
   function heartBeat() public {
     if (dateStarted == 0) {
-      return;
-      // FIXME revert ClaimNotStarted();
+      revert ClaimNotStarted();
     }
     if (owner != msg.sender) {
       revert OwnerRequired();
     }
 
-    dateStarted = 0;
-
-    emit TimeoutReset();
+    _heartBeat();
   }
 
   function initClaim() public {

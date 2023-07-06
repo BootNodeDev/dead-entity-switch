@@ -79,7 +79,7 @@ contract DESAccount is DefaultAccount, DeadEntitySwitch {
     if (!success) {
       EfficientCall.propagateRevert();
     } else {
-      heartBeat();
+      _heartBeat();
     }
   }
 }
