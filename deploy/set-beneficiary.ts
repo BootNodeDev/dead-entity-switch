@@ -7,7 +7,6 @@ import {
   utils,
 } from "zksync-web3";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 
 import dotenv from "dotenv";
 import { ethers } from "ethers";
