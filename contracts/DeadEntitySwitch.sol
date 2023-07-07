@@ -69,9 +69,7 @@ contract DeadEntitySwitch {
     if (dateStarted != 0) {
       revert ClaimAlreadyStarted();
     }
-    if (msg.sender != beneficiary) {
-      revert BeneficiaryRequired();
-    }
+    if (msg.sender != beneficiary) revert BeneficiaryRequired();
 
     dateStarted = block.timestamp;
 
@@ -79,9 +77,10 @@ contract DeadEntitySwitch {
   }
 
   function finishClaim() public {
-    if ((dateStarted + claimTimeout) >= block.timestamp) {
+    if ((dateStarted + claimTimeout) < block.timestamp)
       revert TimeoutNotFinished();
-    }
+
+    if (msg.sender != beneficiary) revert BeneficiaryRequired();
 
     owner = beneficiary;
     dateStarted = 0;
