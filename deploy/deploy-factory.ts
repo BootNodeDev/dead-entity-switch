@@ -1,16 +1,9 @@
 import { Wallet, utils } from "zksync-web3";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
+import { getPrivateKeyOwner } from "./envValidate";
 
-// load env file
-import dotenv from "dotenv";
-dotenv.config();
-
-// load wallet private key from env file
-const PK_OWNER = process.env.PK_OWNER || "";
-
-if (!PK_OWNER) throw "⛔️ Private key not detected! Add it to the .env file!";
-
+const { PK_OWNER } = getPrivateKeyOwner();
 export default async function (hre: HardhatRuntimeEnvironment) {
   const wallet = new Wallet(PK_OWNER);
 

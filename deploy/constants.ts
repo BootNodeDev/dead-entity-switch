@@ -1,1 +1,1 @@
-export const ZKSYNC_TX_TYPE = 113;
+export const TX_TYPE_ZKSYNC = 113;
