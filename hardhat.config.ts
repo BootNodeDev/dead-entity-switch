@@ -4,6 +4,7 @@ import "@matterlabs/hardhat-zksync-deploy";
 import "@matterlabs/hardhat-zksync-solc";
 
 import "@matterlabs/hardhat-zksync-verify";
+import "@matterlabs/hardhat-zksync-chai-matchers";
 
 // dynamically changes endpoints for local tests
 const zkSyncTestnet =

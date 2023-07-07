@@ -6,14 +6,18 @@ import { TX_TYPE_ZKSYNC } from "./constants";
 import { getEnvs } from "./envValidate";
 
 const { PK_BENEFICIARY: PK_OWNER, DESA_ACCOUNT } = getEnvs();
-export default async function (hre: HardhatRuntimeEnvironment) {
-  const provider = new Provider("https://testnet.era.zksync.dev");
-  const owner = new Wallet(PK_OWNER, provider);
 
-  const transferAmount = "0";
+const extractETH = async (
+  hre: HardhatRuntimeEnvironment,
+  provider: Provider,
+  account: string,
+  owner: Wallet,
+  to: string,
+  transferAmount: string
+) => {
   const extractEth = {
-    from: DESA_ACCOUNT,
-    to: owner.address,
+    from: account,
+    to,
     chainId: (await provider.getNetwork()).chainId,
     nonce: await provider.getTransactionCount(DESA_ACCOUNT),
     type: TX_TYPE_ZKSYNC,
@@ -37,14 +41,27 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     customSignature: signature,
   };
 
-  const oldBalance = await provider.getBalance(DESA_ACCOUNT);
+  return await provider.sendTransaction(utils.serialize(extractEth));
+};
+export default async function (hre: HardhatRuntimeEnvironment) {
+  const provider = new Provider("https://testnet.era.zksync.dev");
+  const owner = new Wallet(PK_OWNER, provider);
 
-  const sentTx = await provider.sendTransaction(utils.serialize(extractEth));
+  const transferAmount = "0";
+  const oldBalance = await provider.getBalance(DESA_ACCOUNT);
 
   console.log(
     `Sending balance ${oldBalance} of account ${DESA_ACCOUNT} to ${owner.address}...`
   );
 
+  const sentTx = await extractETH(
+    hre,
+    provider,
+    DESA_ACCOUNT,
+    owner,
+    owner.address,
+    transferAmount
+  );
   // Account should have enough gas
   await sentTx.wait();
 

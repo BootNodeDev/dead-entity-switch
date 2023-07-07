@@ -1,4 +1,8 @@
-# zkSync Hardhat project
+# Dead Entity Switch
+
+## Testing
+
+- [local testing setup](https://era.zksync.io/docs/tools/hardhat/testing.html#rich-wallets).
 
 This project was scaffolded with [zksync-cli](https://github.com/matter-labs/zksync-cli).
 

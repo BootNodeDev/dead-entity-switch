@@ -15,24 +15,25 @@ import { getEnvs } from "./envValidate";
 
 const { PK_OWNER, DESA_ACCOUNT } = getEnvs();
 
-export default async function (hre: HardhatRuntimeEnvironment) {
-  const provider = new Provider("https://testnet.era.zksync.dev");
-
-  const owner = new Wallet(PK_OWNER, provider);
-
+export const setTimeout = async (
+  hre: HardhatRuntimeEnvironment,
+  signer: Wallet,
+  provider: Provider,
+  account: string,
+  claimTimeout: number
+) => {
   const aaArtifact = await hre.artifacts.readArtifact("DESAccount");
-  const desaAccount = new Contract(DESA_ACCOUNT, aaArtifact.abi, owner);
+  const desaAccount = new Contract(account, aaArtifact.abi, signer);
 
-  const NEW_TIMEOUT = 5 * 60; // 5 minutes
   let setTimeoutTx = await desaAccount.populateTransaction.setClaimTimeout(
-    NEW_TIMEOUT
+    claimTimeout
   );
 
   setTimeoutTx = {
     ...setTimeoutTx,
-    from: DESA_ACCOUNT,
+    from: account,
     chainId: (await provider.getNetwork()).chainId,
-    nonce: await provider.getTransactionCount(DESA_ACCOUNT),
+    nonce: await provider.getTransactionCount(account),
     type: TX_TYPE_ZKSYNC,
     customData: {
       gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
@@ -46,7 +47,7 @@ export default async function (hre: HardhatRuntimeEnvironment) {
   const signedTxHash = EIP712Signer.getSignedDigest(setTimeoutTx);
 
   const signature = ethers.utils.arrayify(
-    ethers.utils.joinSignature(owner._signingKey().signDigest(signedTxHash))
+    ethers.utils.joinSignature(signer._signingKey().signDigest(signedTxHash))
   );
 
   setTimeoutTx.customData = {
@@ -54,10 +55,26 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     customSignature: signature,
   };
 
+  return await provider.sendTransaction(utils.serialize(setTimeoutTx));
+};
+
+export default async function (hre: HardhatRuntimeEnvironment) {
+  const provider = new Provider("https://testnet.era.zksync.dev");
+
+  const owner = new Wallet(PK_OWNER, provider);
+  const aaArtifact = await hre.artifacts.readArtifact("DESAccount");
+  const desaAccount = new Contract(DESA_ACCOUNT, aaArtifact.abi, owner);
+
+  const NEW_TIMEOUT = 5 * 60; // 5 minutes
+
   const oldTimeout = await desaAccount.claimTimeout();
-
-  const sentTx = await provider.sendTransaction(utils.serialize(setTimeoutTx));
-
+  const sentTx = await setTimeout(
+    hre,
+    owner,
+    provider,
+    DESA_ACCOUNT,
+    NEW_TIMEOUT
+  );
   console.log(`Setting timeout as ${NEW_TIMEOUT} (was ${oldTimeout})...`);
 
   // Account should have enough gas

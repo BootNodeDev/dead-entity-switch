@@ -13,24 +13,23 @@ import { TX_TYPE_ZKSYNC } from "./constants";
 import { getEnvs } from "./envValidate";
 
 const { PK_OWNER, PK_BENEFICIARY, DESA_ACCOUNT } = getEnvs();
-export default async function (hre: HardhatRuntimeEnvironment) {
-  const provider = new Provider("https://testnet.era.zksync.dev");
 
-  const owner = new Wallet(PK_OWNER, provider);
-  const beneficiary = new Wallet(PK_BENEFICIARY, provider);
-
-  const aaArtifact = await hre.artifacts.readArtifact("DESAccount");
-  const desaAccount = new Contract(DESA_ACCOUNT, aaArtifact.abi, owner);
-
+export const setBeneficiary = async (
+  hre: HardhatRuntimeEnvironment,
+  provider: Provider,
+  desaAccount: Contract,
+  owner: Wallet,
+  beneficiary: string
+) => {
   let setBeneficiaryTx = await desaAccount.populateTransaction.setBeneficiary(
-    beneficiary.address
+    beneficiary
   );
 
   setBeneficiaryTx = {
     ...setBeneficiaryTx,
-    from: DESA_ACCOUNT,
+    from: desaAccount.address,
     chainId: (await provider.getNetwork()).chainId,
-    nonce: await provider.getTransactionCount(DESA_ACCOUNT),
+    nonce: await provider.getTransactionCount(desaAccount.address),
     type: TX_TYPE_ZKSYNC,
     customData: {
       gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
@@ -52,10 +51,24 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     customSignature: signature,
   };
 
-  const oldBeneficiary = await desaAccount.beneficiary();
+  return await provider.sendTransaction(utils.serialize(setBeneficiaryTx));
+};
+export default async function (hre: HardhatRuntimeEnvironment) {
+  const provider = new Provider("https://testnet.era.zksync.dev");
 
-  const sentTx = await provider.sendTransaction(
-    utils.serialize(setBeneficiaryTx)
+  const owner = new Wallet(PK_OWNER, provider);
+  const beneficiary = new Wallet(PK_BENEFICIARY, provider);
+
+  const aaArtifact = await hre.artifacts.readArtifact("DESAccount");
+  const desaAccount = new Contract(DESA_ACCOUNT, aaArtifact.abi, owner);
+
+  const oldBeneficiary = await desaAccount.beneficiary();
+  const setBeneficiaryTx = await setBeneficiary(
+    hre,
+    provider,
+    desaAccount,
+    owner,
+    beneficiary.address
   );
 
   console.log(
@@ -63,7 +76,7 @@ export default async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Account should have enough gas
-  await sentTx.wait();
+  await setBeneficiaryTx.wait();
 
   const newBeneficiary = await desaAccount.beneficiary();
   console.log(`Beneficiary set to ${newBeneficiary}.`);
