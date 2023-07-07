@@ -25,6 +25,6 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     `Claim finished owner is ${ownerAddress} was ${oldOwnerAddress}.`
   );
   console.log(
-    `Claim finished beneficiary is ${beneficiaryAddress} was ${oldBeneficiaryAddress}.`
+    `Claim finished beneficiary is ${beneficiaryAddress} (reset) was ${oldBeneficiaryAddress}.`
   );
 }

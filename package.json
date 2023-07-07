@@ -27,7 +27,12 @@
   },
   "scripts": {
     "test": "NODE_ENV=test hardhat test --network zkSyncTestnet",
-    "deploy": "yarn hardhat deploy-zksync --script deploy-greeter.ts",
-    "greet": "yarn hardhat deploy-zksync --script use-greeter.ts"
+    "compile": "yarn hardhat compile",
+    "deploy-factory": "yarn hardhat deploy-zksync --script deploy-factory.ts",
+    "deploy-account": "yarn hardhat deploy-zksync --script deploy-account.ts",
+    "set-beneficiary": "yarn hardhat deploy-zksync --script set-beneficiary.ts",
+    "set-timeout": "yarn hardhat deploy-zksync --script set-timeout.ts",
+    "init-claim": "yarn hardhat deploy-zksync --script init-claim.ts",
+    "finish-claim": "yarn hardhat deploy-zksync --script finish-claim.ts"
   }
 }

@@ -67,7 +67,8 @@ contract DeadEntitySwitch {
 
   function finishClaim() public {
     if (msg.sender != beneficiary) revert BeneficiaryRequired();
-    if ((dateStarted + claimTimeout) < block.timestamp)
+    if (dateStarted == 0) revert ClaimNotStarted();
+    if ((dateStarted + claimTimeout) > block.timestamp)
       revert TimeoutNotFinished();
 
     owner = beneficiary;
