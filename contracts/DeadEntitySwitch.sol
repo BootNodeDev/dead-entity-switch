@@ -27,21 +27,16 @@ contract DeadEntitySwitch {
   }
 
   function setBeneficiary(address _beneficiary) public {
-    if (msg.sender != address(this)) {
-      revert OwnerRequired();
-    }
+    if (msg.sender != address(this)) revert OwnerRequired();
+
     beneficiary = _beneficiary;
 
     emit BeneficiaryChanged(_beneficiary);
   }
 
   function setClaimTimeout(uint256 _timeout) public {
-    if (msg.sender != address(this)) {
-      revert OwnerRequired();
-    }
-    if (_timeout < MIN_TIMEOUT) {
-      revert TimeoutTooShort();
-    }
+    if (msg.sender != address(this)) revert OwnerRequired();
+    if (_timeout < MIN_TIMEOUT) revert TimeoutTooShort();
 
     claimTimeout = _timeout;
 
@@ -55,21 +50,15 @@ contract DeadEntitySwitch {
   }
 
   function heartBeat() public {
-    if (dateStarted == 0) {
-      revert ClaimNotStarted();
-    }
-    if (msg.sender != address(this)) {
-      revert OwnerRequired();
-    }
+    if (dateStarted == 0) revert ClaimNotStarted();
+    if (msg.sender != address(this)) revert OwnerRequired();
 
     _heartBeat();
   }
 
   function initClaim() public {
-    if (dateStarted != 0) {
-      revert ClaimAlreadyStarted();
-    }
     if (msg.sender != beneficiary) revert BeneficiaryRequired();
+    if (dateStarted != 0) revert ClaimAlreadyStarted();
 
     dateStarted = block.timestamp;
 
@@ -77,10 +66,9 @@ contract DeadEntitySwitch {
   }
 
   function finishClaim() public {
+    if (msg.sender != beneficiary) revert BeneficiaryRequired();
     if ((dateStarted + claimTimeout) < block.timestamp)
       revert TimeoutNotFinished();
-
-    if (msg.sender != beneficiary) revert BeneficiaryRequired();
 
     owner = beneficiary;
     dateStarted = 0;
