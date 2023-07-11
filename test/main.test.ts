@@ -1,10 +1,11 @@
+import { Wallet, Provider } from "zksync-web3";
 import { expect } from "chai";
-import { Wallet, Provider, Contract } from "zksync-web3";
 import * as hre from "hardhat";
+import { ethers } from "ethers";
+
 import { RICH_WALLETS_LOCAL_SETUP } from "../deploy/constants";
 import { deployFactory } from "../deploy/deploy-factory";
 import { deployAccount } from "../deploy/deploy-account";
-import { ethers } from "ethers";
 import { setTimeout } from "../deploy/set-timeout";
 import { setBeneficiary } from "../deploy/set-beneficiary";
 
@@ -49,9 +50,9 @@ describe("DESAccountFactory", function () {
     const accountContract = new ethers.Contract(account, aaArtifact.abi);
 
     // FIXME Is using hardhat-chai instead of zksync-chai?
-    // await expect(
-    //   setTimeout(hre, walletOwner, provider, account, 1 * 60)
-    // ).to.be.revertedWithCustomError(aa, "TimeoutTooShort");
+    await expect(
+      setTimeout(hre, walletOwner, provider, account, 3 * 60)
+    ).to.be.revertedWithCustomError(accountContract, "TimeoutTooShort");
 
     await setTimeout(hre, walletOwner, provider, account, 5 * 60);
     await setBeneficiary(
