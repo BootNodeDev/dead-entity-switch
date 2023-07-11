@@ -38,7 +38,7 @@ export const deployAccount = async (
 };
 
 export default async function (hre: HardhatRuntimeEnvironment) {
-  const provider = new Provider("https://testnet.era.zksync.dev");
+  const provider = Provider.getDefaultProvider();
 
   const wallet = new Wallet(PK_OWNER).connect(provider);
   const desaAddress = await deployAccount(hre, wallet, FACTORY);

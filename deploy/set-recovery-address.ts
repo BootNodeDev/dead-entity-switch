@@ -9,75 +9,76 @@ import {
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ethers } from "ethers";
-import { TX_TYPE_ZKSYNC } from "./constants";
 import { getEnvs } from "./envValidate";
+import { EIP712_TX_TYPE } from "zksync-web3/build/src/utils";
 
 const { PK_OWNER, PK_BENEFICIARY, DESA_ACCOUNT } = getEnvs();
 
-export const setBeneficiary = async (
+export const setRecoveryAddress = async (
   hre: HardhatRuntimeEnvironment,
   provider: Provider,
   desaAccount: Contract,
   owner: Wallet,
-  beneficiary: string
+  recoveryAddress: string
 ) => {
-  let setBeneficiaryTx = await desaAccount.populateTransaction.setBeneficiary(
-    beneficiary
-  );
+  let setRecoveryAddressTx =
+    await desaAccount.populateTransaction.setRecoveryAddress(recoveryAddress);
 
-  setBeneficiaryTx = {
-    ...setBeneficiaryTx,
+  setRecoveryAddressTx = {
+    ...setRecoveryAddressTx,
     from: desaAccount.address,
     chainId: (await provider.getNetwork()).chainId,
     nonce: await provider.getTransactionCount(desaAccount.address),
-    type: TX_TYPE_ZKSYNC,
+    type: EIP712_TX_TYPE,
     customData: {
       gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
     } as types.Eip712Meta,
     value: ethers.BigNumber.from(0),
   };
 
-  setBeneficiaryTx.gasPrice = await provider.getGasPrice();
-  setBeneficiaryTx.gasLimit = await provider.estimateGas(setBeneficiaryTx);
+  setRecoveryAddressTx.gasPrice = await provider.getGasPrice();
+  setRecoveryAddressTx.gasLimit = await provider.estimateGas(
+    setRecoveryAddressTx
+  );
 
-  const signedTxHash = EIP712Signer.getSignedDigest(setBeneficiaryTx);
+  const signedTxHash = EIP712Signer.getSignedDigest(setRecoveryAddressTx);
 
   const signature = ethers.utils.arrayify(
     ethers.utils.joinSignature(owner._signingKey().signDigest(signedTxHash))
   );
 
-  setBeneficiaryTx.customData = {
-    ...setBeneficiaryTx.customData,
+  setRecoveryAddressTx.customData = {
+    ...setRecoveryAddressTx.customData,
     customSignature: signature,
   };
 
-  return await provider.sendTransaction(utils.serialize(setBeneficiaryTx));
+  return await provider.sendTransaction(utils.serialize(setRecoveryAddressTx));
 };
 export default async function (hre: HardhatRuntimeEnvironment) {
-  const provider = new Provider("https://testnet.era.zksync.dev");
+  const provider = Provider.getDefaultProvider();
 
   const owner = new Wallet(PK_OWNER, provider);
-  const beneficiary = new Wallet(PK_BENEFICIARY, provider);
+  const recoveryAddress = new Wallet(PK_BENEFICIARY, provider);
 
   const aaArtifact = await hre.artifacts.readArtifact("DESAccount");
   const desaAccount = new Contract(DESA_ACCOUNT, aaArtifact.abi, owner);
 
-  const oldBeneficiary = await desaAccount.beneficiary();
-  const setBeneficiaryTx = await setBeneficiary(
+  const oldRecoveryAddress = await desaAccount.recoveryAddress();
+  const setRecoveryAddressTx = await setRecoveryAddress(
     hre,
     provider,
     desaAccount,
     owner,
-    beneficiary.address
+    recoveryAddress.address
   );
 
   console.log(
-    `Setting beneficiary for account as ${beneficiary.address} (was ${oldBeneficiary})...`
+    `Setting recoveryAddress for account as ${recoveryAddress.address} (was ${oldRecoveryAddress})...`
   );
 
   // Account should have enough gas
-  await setBeneficiaryTx.wait();
+  await setRecoveryAddressTx.wait();
 
-  const newBeneficiary = await desaAccount.beneficiary();
+  const newBeneficiary = await desaAccount.recoveryAddress();
   console.log(`Beneficiary set to ${newBeneficiary}.`);
 }

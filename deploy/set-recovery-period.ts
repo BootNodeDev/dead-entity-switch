@@ -15,22 +15,21 @@ import { getEnvs } from "./envValidate";
 
 const { PK_OWNER, DESA_ACCOUNT } = getEnvs();
 
-export const setTimeout = async (
+export const setRecoveryPeriod = async (
   hre: HardhatRuntimeEnvironment,
   signer: Wallet,
   provider: Provider,
   account: string,
-  claimTimeout: number
+  recoveryPeriod: number
 ) => {
   const aaArtifact = await hre.artifacts.readArtifact("DESAccount");
   const desaAccount = new Contract(account, aaArtifact.abi, signer);
 
-  let setTimeoutTx = await desaAccount.populateTransaction.setClaimTimeout(
-    claimTimeout
-  );
+  let setRecoveryPeriodTx =
+    await desaAccount.populateTransaction.setRecoveryPeriod(recoveryPeriod);
 
-  setTimeoutTx = {
-    ...setTimeoutTx,
+  setRecoveryPeriodTx = {
+    ...setRecoveryPeriodTx,
     from: account,
     chainId: (await provider.getNetwork()).chainId,
     nonce: await provider.getTransactionCount(account),
@@ -41,25 +40,27 @@ export const setTimeout = async (
     value: ethers.BigNumber.from(0),
   };
 
-  setTimeoutTx.gasPrice = await provider.getGasPrice();
-  setTimeoutTx.gasLimit = await provider.estimateGas(setTimeoutTx);
+  setRecoveryPeriodTx.gasPrice = await provider.getGasPrice();
+  setRecoveryPeriodTx.gasLimit = await provider.estimateGas(
+    setRecoveryPeriodTx
+  );
 
-  const signedTxHash = EIP712Signer.getSignedDigest(setTimeoutTx);
+  const signedTxHash = EIP712Signer.getSignedDigest(setRecoveryPeriodTx);
 
   const signature = ethers.utils.arrayify(
     ethers.utils.joinSignature(signer._signingKey().signDigest(signedTxHash))
   );
 
-  setTimeoutTx.customData = {
-    ...setTimeoutTx.customData,
+  setRecoveryPeriodTx.customData = {
+    ...setRecoveryPeriodTx.customData,
     customSignature: signature,
   };
 
-  return await provider.sendTransaction(utils.serialize(setTimeoutTx));
+  return await provider.sendTransaction(utils.serialize(setRecoveryPeriodTx));
 };
 
 export default async function (hre: HardhatRuntimeEnvironment) {
-  const provider = new Provider("https://testnet.era.zksync.dev");
+  const provider = Provider.getDefaultProvider();
 
   const owner = new Wallet(PK_OWNER, provider);
   const aaArtifact = await hre.artifacts.readArtifact("DESAccount");
@@ -67,21 +68,23 @@ export default async function (hre: HardhatRuntimeEnvironment) {
 
   const NEW_TIMEOUT = 5 * 60; // 5 minutes
 
-  const oldTimeout = await desaAccount.claimTimeout();
-  const sentTx = await setTimeout(
+  const oldRecoveryPeriod = await desaAccount.recoveryPeriod();
+  const sentTx = await setRecoveryPeriod(
     hre,
     owner,
     provider,
     DESA_ACCOUNT,
     NEW_TIMEOUT
   );
-  console.log(`Setting timeout as ${NEW_TIMEOUT} (was ${oldTimeout})...`);
+  console.log(
+    `Setting recovery period as ${NEW_TIMEOUT} (was ${oldRecoveryPeriod})...`
+  );
 
   // Account should have enough gas
   await sentTx.wait();
 
-  const newTimeout = await desaAccount.claimTimeout();
-  const dateStarted = await desaAccount.dateStarted();
-  console.log(`ClaimTimeout set to ${newTimeout}.`); // TODO humanize?
-  console.log(`dateStarted was reset to ${dateStarted}`);
+  const newRecoveryPeriod = await desaAccount.recoveryPeriod();
+  const recoveryStartDate = await desaAccount.recoveryStartDate();
+  console.log(`recoveryPeriod set to ${newRecoveryPeriod}.`);
+  console.log(`recoveryStartDate was reset to ${recoveryStartDate}`);
 }

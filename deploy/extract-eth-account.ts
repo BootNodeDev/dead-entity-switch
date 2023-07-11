@@ -2,8 +2,8 @@ import { EIP712Signer, Provider, Wallet, types, utils } from "zksync-web3";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ethers } from "ethers";
-import { TX_TYPE_ZKSYNC } from "./constants";
 import { getEnvs } from "./envValidate";
+import { EIP712_TX_TYPE } from "zksync-web3/build/src/utils";
 
 const { PK_BENEFICIARY: PK_OWNER, DESA_ACCOUNT } = getEnvs();
 
@@ -20,7 +20,7 @@ const extractETH = async (
     to,
     chainId: (await provider.getNetwork()).chainId,
     nonce: await provider.getTransactionCount(DESA_ACCOUNT),
-    type: TX_TYPE_ZKSYNC,
+    type: EIP712_TX_TYPE,
     customData: {
       gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
     } as types.Eip712Meta,
@@ -44,7 +44,7 @@ const extractETH = async (
   return await provider.sendTransaction(utils.serialize(extractEth));
 };
 export default async function (hre: HardhatRuntimeEnvironment) {
-  const provider = new Provider("https://testnet.era.zksync.dev");
+  const provider = Provider.getDefaultProvider();
   const owner = new Wallet(PK_OWNER, provider);
 
   const transferAmount = "0";

@@ -1,4 +1,3 @@
-export const TX_TYPE_ZKSYNC = 113;
 export const RICH_WALLETS_LOCAL_SETUP = [
   {
     address: "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049",
