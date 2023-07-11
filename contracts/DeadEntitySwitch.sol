@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 contract DeadEntitySwitch {
   uint256 constant MIN_TIMEOUT = 5 minutes;
@@ -73,7 +73,7 @@ contract DeadEntitySwitch {
   }
 
   function _heartBeatIfRequired() internal {
-    if (dateStaterd != 0) {
+    if (dateStarted != 0) {
       _heartBeat();
     }
   }
