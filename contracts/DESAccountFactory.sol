@@ -4,6 +4,9 @@ pragma solidity 0.8.17;
 import "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
 import "@matterlabs/zksync-contracts/l2/system-contracts/libraries/SystemContractsCaller.sol";
 
+/// @author BootNode Team
+/// @title Dead Entity Switch Account Factory
+/// @notice Proof of Concept for BUIDLEra hackathon
 contract DESAccountFactory {
   bytes32 public aaBytecodeHash;
 
@@ -13,6 +16,10 @@ contract DESAccountFactory {
     aaBytecodeHash = _aaBytecodeHash;
   }
 
+  /// @notice Deploy a new dead entity switch account 
+  /// @param salt to be passed on create2Account
+  /// @param owner owner of the new account 
+  /// @return accountAddress address of the new account
   function deployAccount(
     bytes32 salt,
     address owner
@@ -35,7 +42,7 @@ contract DESAccountFactory {
     require(success, "Deployment failed");
 
     (accountAddress) = abi.decode(returnData, (address));
-    
+
     emit DESAccountDeployed(accountAddress, owner);
   }
 }

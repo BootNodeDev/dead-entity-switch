@@ -7,6 +7,12 @@ import { DEPLOYER_SYSTEM_CONTRACT } from "@matterlabs/zksync-contracts/l2/system
 import { DefaultAccount } from "./lib/DefaultAccount.sol";
 import { DeadEntitySwitch } from "./DeadEntitySwitch.sol";
 
+/// @author BootNode Team
+/// @title Dead Entity Switch Account
+/// @notice Proof of Concept for BUIDLEra hackathon
+/// @dev _isValidSignature and _execute are overriden from DefaultAccount.
+///      _isValidSignature is changed to compare erecover against the current owner
+///      _execute is changed to signal for new activiy using heartBeat functionality of DeadEntitySwitch
 contract DESAccount is DefaultAccount, DeadEntitySwitch {
   using TransactionHelper for *;
 
