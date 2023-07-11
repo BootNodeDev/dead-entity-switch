@@ -12,7 +12,7 @@ import { DeadEntitySwitch } from "./DeadEntitySwitch.sol";
 /// @notice Proof of Concept for BUIDLEra hackathon
 /// @dev _isValidSignature and _execute are overriden from DefaultAccount.
 ///      _isValidSignature is changed to compare erecover against the current owner
-///      _execute is changed to signal for new activiy using heartBeat functionality of DeadEntitySwitch
+///      _execute is changed to signal for new activity using heartBeat functionality of DeadEntitySwitch
 contract DESAccount is DefaultAccount, DeadEntitySwitch {
   using TransactionHelper for *;
 
