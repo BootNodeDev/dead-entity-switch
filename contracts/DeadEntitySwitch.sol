@@ -11,7 +11,7 @@ contract DeadEntitySwitch {
   /// @notice The current address that is able to sign txs on behalf of this abstract account
   address public owner;
 
-  /// @notice Address set to be owner if no activity is present on this account after the recoveryPeriod. 0 if not recovery is on progress.
+  /// @notice Address set to be owner if no activity is present on this account after the recoveryPeriod.
   address public recoveryAddress;
 
   /// @notice Timestamp to record when the recovery was initiated. 0 if not recovery is on progress
