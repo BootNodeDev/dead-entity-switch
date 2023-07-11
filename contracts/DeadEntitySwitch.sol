@@ -5,82 +5,82 @@ contract DeadEntitySwitch {
   uint256 constant MIN_TIMEOUT = 5 minutes;
 
   address public owner;
-  address public beneficiary;
-  uint256 public dateStarted;
-  uint256 public claimTimeout = 365 days;
+  address public recoveryAddress;
+  uint256 public recoveryStartDate;
+  uint256 public recoveryPeriod = 365 days;
 
-  event BeneficiaryChanged(address beneficiary);
-  event TimeoutChanged(uint timeout);
-  event TimeoutReset();
-  event ClaimInitiated(uint256 date, address beneficiary);
-  event ClaimFinished(uint256 date, address beneficiary);
+  event RecoveryAddressUpdated(address recoveryAddress);
+  event RecoveryPeriodUpdated(uint recoveryPeriod);
+  event RecoveryStartDateReset();
+  event RecoveryInitiated(uint256 date, address recoveryAddress);
+  event RecoveryFinished(uint256 date, address recoveryAddress);
 
   error OwnerRequired();
-  error BeneficiaryRequired();
-  error ClaimAlreadyStarted();
-  error ClaimNotStarted();
-  error TimeoutTooShort();
-  error TimeoutNotFinished();
+  error RecoveryAddressRequired();
+  error RecoveryAlreadyStarted();
+  error RecoveryNotStarted();
+  error RecoveryPeriodTooShort();
+  error RecoveryPeriodNotFinished();
 
   constructor(address _owner) {
     owner = _owner;
   }
 
-  function setBeneficiary(address _beneficiary) external {
+  function setRecoveryAddress(address _recoveryAddress) external {
     if (msg.sender != address(this)) revert OwnerRequired();
 
-    beneficiary = _beneficiary;
+    recoveryAddress = _recoveryAddress;
 
-    emit BeneficiaryChanged(_beneficiary);
+    emit RecoveryAddressUpdated(_recoveryAddress);
   }
 
-  function setClaimTimeout(uint256 _timeout) external {
+  function setRecoveryPeriod(uint256 _recoveryPeriod) external {
     if (msg.sender != address(this)) revert OwnerRequired();
-    if (_timeout < MIN_TIMEOUT) revert TimeoutTooShort();
+    if (_recoveryPeriod < MIN_TIMEOUT) revert RecoveryPeriodTooShort();
 
-    claimTimeout = _timeout;
+    recoveryPeriod = _recoveryPeriod;
 
-    emit TimeoutChanged(_timeout);
+    emit RecoveryPeriodUpdated(_recoveryPeriod);
   }
 
   function heartBeat() external {
-    if (dateStarted == 0) revert ClaimNotStarted();
+    if (recoveryStartDate == 0) revert RecoveryNotStarted();
     if (msg.sender != address(this)) revert OwnerRequired();
 
     _heartBeat();
   }
 
-  function initClaim() external {
-    if (msg.sender != beneficiary) revert BeneficiaryRequired();
-    if (dateStarted != 0) revert ClaimAlreadyStarted();
+  function initRecovery() external {
+    if (msg.sender != recoveryAddress) revert RecoveryAddressRequired();
+    if (recoveryStartDate != 0) revert RecoveryAlreadyStarted();
 
-    dateStarted = block.timestamp;
+    recoveryStartDate = block.timestamp;
 
-    emit ClaimInitiated(dateStarted, beneficiary);
+    emit RecoveryInitiated(recoveryStartDate, recoveryAddress);
   }
 
-  function finishClaim() external {
-    if (msg.sender != beneficiary) revert BeneficiaryRequired();
-    if (dateStarted == 0) revert ClaimNotStarted();
-    if ((dateStarted + claimTimeout) > block.timestamp)
-      revert TimeoutNotFinished();
+  function finishRecovery() external {
+    if (msg.sender != recoveryAddress) revert RecoveryAddressRequired();
+    if (recoveryStartDate == 0) revert RecoveryNotStarted();
+    if ((recoveryStartDate + recoveryPeriod) > block.timestamp)
+      revert RecoveryPeriodNotFinished();
 
-    owner = beneficiary;
-    dateStarted = 0;
-    beneficiary = address(0);
+    owner = recoveryAddress;
+    recoveryStartDate = 0;
+    recoveryAddress = address(0);
 
-    emit ClaimFinished(block.timestamp, owner);
+    emit RecoveryFinished(block.timestamp, owner);
   }
 
   function _heartBeatIfRequired() internal {
-    if (dateStarted != 0) {
+    if (recoveryStartDate != 0) {
       _heartBeat();
     }
   }
 
   function _heartBeat() internal {
-    dateStarted = 0;
+    recoveryStartDate = 0;
 
-    emit TimeoutReset();
+    emit RecoveryStartDateReset();
   }
 }
