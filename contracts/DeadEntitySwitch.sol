@@ -14,7 +14,7 @@ contract DeadEntitySwitch {
   /// @notice Address set to be owner if no activity is present on this account after the recoveryPeriod.
   address public recoveryAddress;
 
-  /// @notice Timestamp to record when the recovery was initiated. 0 if not recovery is on progress
+  /// @notice Timestamp to record when the recovery was initiated. 0 if recovery is not in progress
   uint256 public recoveryStartDate;
 
   /// @notice The current period of time that must pass without activity on the account to complete the recovery.
