@@ -43,12 +43,6 @@ contract DeadEntitySwitch {
     emit TimeoutChanged(_timeout);
   }
 
-  function _heartBeat() internal {
-    dateStarted = 0;
-
-    emit TimeoutReset();
-  }
-
   function heartBeat() public {
     if (dateStarted == 0) revert ClaimNotStarted();
     if (msg.sender != address(this)) revert OwnerRequired();
@@ -76,5 +70,17 @@ contract DeadEntitySwitch {
     beneficiary = address(0);
 
     emit ClaimFinished(block.timestamp, owner);
+  }
+
+  function _heartBeatIfRequired() internal {
+    if (dateStaterd != 0) {
+      _heartBeat();
+    }
+  }
+
+  function _heartBeat() internal {
+    dateStarted = 0;
+
+    emit TimeoutReset();
   }
 }

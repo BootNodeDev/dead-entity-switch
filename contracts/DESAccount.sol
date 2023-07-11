@@ -12,7 +12,7 @@ contract DESAccount is DefaultAccount, DeadEntitySwitch {
 
   constructor(address _owner) DeadEntitySwitch(_owner) {}
 
-  /// @notice Validation that the ECDSA signature of the transaction is correct.
+  /// @notice Compare against owner instead of address(this). Validation that the ECDSA signature of the transaction is correct.
   /// @param _hash The hash of the transaction to be signed.
   /// @param _signature The signature of the transaction.
   /// @return EIP1271_SUCCESS_RETURN_VALUE if the signaure is correct. It reverts otherwise.
@@ -79,7 +79,7 @@ contract DESAccount is DefaultAccount, DeadEntitySwitch {
     if (!success) {
       EfficientCall.propagateRevert();
     } else {
-      _heartBeat();
+      _heartBeatIfRequired();
     }
   }
 }
