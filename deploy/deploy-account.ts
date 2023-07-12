@@ -5,14 +5,18 @@ import { getPrivateKeyOwner, getFactoryAddress } from "./envValidate";
 
 const { PK_OWNER } = getPrivateKeyOwner();
 const { FACTORY } = getFactoryAddress();
-export default async function (hre: HardhatRuntimeEnvironment) {
-  const provider = new Provider("https://testnet.era.zksync.dev");
 
-  const wallet = new Wallet(PK_OWNER).connect(provider);
+export const deployAccount = async (
+  hre: HardhatRuntimeEnvironment,
+  wallet: Wallet,
+  factoryAddress: string
+): Promise<string> => {
   const factoryArtifact = await hre.artifacts.readArtifact("DESAccountFactory");
-
-  console.log(`Deploying new account with ${FACTORY} factory...`);
-  const aaFactory = new ethers.Contract(FACTORY, factoryArtifact.abi, wallet);
+  const aaFactory = new ethers.Contract(
+    factoryAddress,
+    factoryArtifact.abi,
+    wallet
+  );
 
   const salt = ethers.constants.HashZero;
 
@@ -24,10 +28,21 @@ export default async function (hre: HardhatRuntimeEnvironment) {
   const abiCoder = new ethers.utils.AbiCoder();
 
   const desaAddress = utils.create2Address(
-    FACTORY,
+    factoryAddress,
     await aaFactory.aaBytecodeHash(),
     salt,
     abiCoder.encode(["address"], [ownerAddress])
   );
+
+  return desaAddress;
+};
+
+export default async function (hre: HardhatRuntimeEnvironment) {
+  const provider = Provider.getDefaultProvider();
+
+  const wallet = new Wallet(PK_OWNER).connect(provider);
+  const desaAddress = await deployAccount(hre, wallet, FACTORY);
+  console.log(`Deploying new account with ${FACTORY} factory...`);
+
   console.log(`dead entity switch account deployed on address ${desaAddress}`);
 }

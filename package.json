@@ -9,14 +9,11 @@
     "@matterlabs/hardhat-zksync-solc": "^0.4.0",
     "@matterlabs/hardhat-zksync-verify": "^0.1.8",
     "@matterlabs/zksync-contracts": "^0.6.1",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
-    "@types/chai": "^4.3.4",
-    "@types/mocha": "^10.0.1",
-    "chai": "^4.3.7",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
     "hardhat": "^2.12.4",
-    "mocha": "^10.2.0",
     "prettier": "^2.8.8",
     "prettier-plugin-solidity": "^1.1.3",
     "solhint": "^3.4.1",
@@ -30,9 +27,11 @@
     "compile": "yarn hardhat compile",
     "deploy-factory": "yarn hardhat deploy-zksync --script deploy-factory.ts",
     "deploy-account": "yarn hardhat deploy-zksync --script deploy-account.ts",
-    "set-beneficiary": "yarn hardhat deploy-zksync --script set-beneficiary.ts",
-    "set-timeout": "yarn hardhat deploy-zksync --script set-timeout.ts",
-    "init-claim": "yarn hardhat deploy-zksync --script init-claim.ts",
-    "finish-claim": "yarn hardhat deploy-zksync --script finish-claim.ts"
+    "set-recovery-address": "yarn hardhat deploy-zksync --script set-recovery-address.ts",
+    "set-recovery-period": "yarn hardhat deploy-zksync --script set-recovery-period.ts",
+    "extract-eth-account": "yarn hardhat deploy-zksync --script extract-eth-account.ts",
+    "heartBeat": "yarn hardhat deploy-zksync --script heartBeat.ts",
+    "init-recovery": "yarn hardhat deploy-zksync --script init-recovery.ts",
+    "finish-recovery": "yarn hardhat deploy-zksync --script finish-recovery.ts"
   }
 }

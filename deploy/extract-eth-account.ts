@@ -2,21 +2,26 @@ import { EIP712Signer, Provider, Wallet, types, utils } from "zksync-web3";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ethers } from "ethers";
-import { TX_TYPE_ZKSYNC } from "./constants";
 import { getEnvs } from "./envValidate";
+import { EIP712_TX_TYPE } from "zksync-web3/build/src/utils";
 
+//  Use beneficiary as owner after finish recovery
 const { PK_BENEFICIARY: PK_OWNER, DESA_ACCOUNT } = getEnvs();
-export default async function (hre: HardhatRuntimeEnvironment) {
-  const provider = new Provider("https://testnet.era.zksync.dev");
-  const owner = new Wallet(PK_OWNER, provider);
 
-  const transferAmount = "0";
+const extractETH = async (
+  hre: HardhatRuntimeEnvironment,
+  provider: Provider,
+  account: string,
+  owner: Wallet,
+  to: string,
+  transferAmount: string
+) => {
   const extractEth = {
-    from: DESA_ACCOUNT,
-    to: owner.address,
+    from: account,
+    to,
     chainId: (await provider.getNetwork()).chainId,
     nonce: await provider.getTransactionCount(DESA_ACCOUNT),
-    type: TX_TYPE_ZKSYNC,
+    type: EIP712_TX_TYPE,
     customData: {
       gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
     } as types.Eip712Meta,
@@ -37,14 +42,29 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     customSignature: signature,
   };
 
-  const oldBalance = await provider.getBalance(DESA_ACCOUNT);
+  return await provider.sendTransaction(utils.serialize(extractEth));
+};
+export default async function (hre: HardhatRuntimeEnvironment) {
+  const provider = Provider.getDefaultProvider();
+  const owner = new Wallet(PK_OWNER, provider);
 
-  const sentTx = await provider.sendTransaction(utils.serialize(extractEth));
+  const fee = "5000000000000000"; // TODO Use estimateGasTransfer
+  const oldBalance = ethers.utils.formatEther(
+    (await provider.getBalance(DESA_ACCOUNT)).sub(fee)
+  );
 
   console.log(
     `Sending balance ${oldBalance} of account ${DESA_ACCOUNT} to ${owner.address}...`
   );
 
+  const sentTx = await extractETH(
+    hre,
+    provider,
+    DESA_ACCOUNT,
+    owner,
+    owner.address,
+    oldBalance
+  );
   // Account should have enough gas
   await sentTx.wait();
 
