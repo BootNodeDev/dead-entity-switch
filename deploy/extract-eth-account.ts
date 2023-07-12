@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import { getEnvs } from "./envValidate";
 import { EIP712_TX_TYPE } from "zksync-web3/build/src/utils";
 
+//  Use beneficiary as owner after finish recovery
 const { PK_BENEFICIARY: PK_OWNER, DESA_ACCOUNT } = getEnvs();
 
 const extractETH = async (
@@ -47,8 +48,10 @@ export default async function (hre: HardhatRuntimeEnvironment) {
   const provider = Provider.getDefaultProvider();
   const owner = new Wallet(PK_OWNER, provider);
 
-  const transferAmount = "0";
-  const oldBalance = await provider.getBalance(DESA_ACCOUNT);
+  const fee = "5000000000000000"; // TODO Use estimateGasTransfer
+  const oldBalance = ethers.utils.formatEther(
+    (await provider.getBalance(DESA_ACCOUNT)).sub(fee)
+  );
 
   console.log(
     `Sending balance ${oldBalance} of account ${DESA_ACCOUNT} to ${owner.address}...`
@@ -60,7 +63,7 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     DESA_ACCOUNT,
     owner,
     owner.address,
-    transferAmount
+    oldBalance
   );
   // Account should have enough gas
   await sentTx.wait();

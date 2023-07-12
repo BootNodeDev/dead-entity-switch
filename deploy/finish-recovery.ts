@@ -16,10 +16,16 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     recoveryAddress
   );
 
-  await desaAccount.finishClaim();
-
   const oldRecoveryAddress = await desaAccount.recoveryAddress();
   const oldOwnerAddress = await desaAccount.owner();
+
+  const tx = await desaAccount.finishRecovery();
+
+  try {
+    await tx.wait();
+  } catch (e) {
+    console.log("Error waiting for tx to be mined", e);
+  }
 
   console.log(
     `Finishing recovery for recoveryAddress ${oldRecoveryAddress}...`

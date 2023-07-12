@@ -34,10 +34,11 @@
     "compile": "yarn hardhat compile",
     "deploy-factory": "yarn hardhat deploy-zksync --script deploy-factory.ts",
     "deploy-account": "yarn hardhat deploy-zksync --script deploy-account.ts",
-    "set-beneficiary": "yarn hardhat deploy-zksync --script set-beneficiary.ts",
-    "set-timeout": "yarn hardhat deploy-zksync --script set-timeout.ts",
+    "set-recovery-address": "yarn hardhat deploy-zksync --script set-recovery-address.ts",
+    "set-recovery-period": "yarn hardhat deploy-zksync --script set-recovery-period.ts",
     "extract-eth-account": "yarn hardhat deploy-zksync --script extract-eth-account.ts",
-    "init-claim": "yarn hardhat deploy-zksync --script init-claim.ts",
-    "finish-claim": "yarn hardhat deploy-zksync --script finish-claim.ts"
+    "heartBeat": "yarn hardhat deploy-zksync --script heartBeat.ts",
+    "init-recovery": "yarn hardhat deploy-zksync --script init-recovery.ts",
+    "finish-recovery": "yarn hardhat deploy-zksync --script finish-recovery.ts"
   }
 }

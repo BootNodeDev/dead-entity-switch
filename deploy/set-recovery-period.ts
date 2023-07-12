@@ -9,9 +9,9 @@ import {
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ethers } from "ethers";
-import { TX_TYPE_ZKSYNC } from "./constants";
 
 import { getEnvs } from "./envValidate";
+import { EIP712_TX_TYPE } from "zksync-web3/build/src/utils";
 
 const { PK_OWNER, DESA_ACCOUNT } = getEnvs();
 
@@ -33,7 +33,7 @@ export const setRecoveryPeriod = async (
     from: account,
     chainId: (await provider.getNetwork()).chainId,
     nonce: await provider.getTransactionCount(account),
-    type: TX_TYPE_ZKSYNC,
+    type: EIP712_TX_TYPE,
     customData: {
       gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
     } as types.Eip712Meta,
