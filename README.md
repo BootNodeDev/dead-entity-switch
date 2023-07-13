@@ -1,47 +1,42 @@
 # Dead Entity Switch
 
-## Testing
-
-- [local testing setup](https://era.zksync.io/docs/tools/hardhat/testing.html#rich-wallets).
-
-This project was scaffolded with [zksync-cli](https://github.com/matter-labs/zksync-cli).
+The Dead Entity Switch aims to enhance the functionality of an account by introducing a recovery mechanism that enables a designated beneficiary to assume complete control over the account under specific conditions. This functionality is designed to address situations where an account becomes inactive or dormant due to prolonged inactivity, thereby ensuring its resources can be efficiently managed and utilized.
 
 ## Project structure
 
 - `/contracts`: smart contracts.
 - `/deploy`: deployment and contract interaction scripts.
-- `/test`: test files
 - `hardhat.config.ts`: configuration file.
 
 ## Commands
 
+Commands are configured in the `package.json` file and use `hardat.config.ts`.
+
 - `yarn hardhat compile` will compile the contracts.
-- `yarn run deploy` will execute the deployment script `/deploy/deploy-greeter.ts`. Requires [environment variable setup](#environment-variables).
-- `yarn run greet` will execute the script `/deploy/use-greeter.ts` which interacts with the Greeter contract deployed.
-- `yarn test`: run tests. **Check test requirements below.**
+- `yarn deploy-factory` deploy factory using `PK_OWNER` account and prints its resulting address.
+- `yarn deploy-account` deploy account using `FACTORY` env variable and prints its address to be replaced in `DESA_ACCOUNT` env variable. The owner will be set to the public key of `PK_OWNER`.
+- `yarn set-recovery-address` interact with `DESA_ACCOUNT` as `PK_OWNER` to set `PK_BENEFICIARY` as recovery address.
+- `yarn set-recovery-period` interect with `DESA_ACCOUNT` as `PK_OWNER` to change current recovery period (by default 365 days) to 5 minutes.
+- `yarn extract-eth-account` interact with `DESA_ACCOUNT` as `PK_BENEFICIARY` (Should be owner first) to extract ETH minus fees from account.
+- `yarn heartBeat` interact with `DESA_ACCOUNT` as `PK_OWNER` to stop any recovery ongoing.
+- `yarn init-recovery` interact with `DESA_ACCOUNT` as `PK_BENEFICIARY` to start the process of recovery.
+- `yarn finish-recovery` interact with `DESA_ACCOUNT` as `PK_BENEFICIARY` to change owner to `PK_BENEFIARY` public key if the recovery period is complete.
 
-Both `yarn run deploy` and `yarn run greet` are configured in the `package.json` file and run `yarn hardhat deploy-zksync`.
+## Environment variables
 
-### Environment variables
+In order to prevent users to leak private keys, this project includes the `dotenv` package which is used to load environment variables. It's used to load the wallet private key, required to run the `deploy-factory` script, and other variables for further interaction with the deployed account.
 
-In order to prevent users to leak private keys, this project includes the `dotenv` package which is used to load environment variables. It's used to load the wallet private key, required to run the deploy script.
-
-To use it, rename `.env.example` to `.env` and enter your private key.
+To use it, rename `.env.example` to `.env` and enter values.
 
 ```
-WALLET_PRIVATE_KEY=123cde574ccff....
+ZKSYNC_WEB3_API_URL=https://zksync2-testnet.zksync.dev
+PK_OWNER=123cde574ccff...
+PK_BENEFICIARY=123cde574ccff...
+FACTORY=0x123cd...
+DESA_ACCOUNT=0x123cd...
 ```
-
-### Local testing
-
-In order to run test, you need to start the zkSync local environment. Please check [this section of the docs](https://v2-docs.zksync.io/api/hardhat/testing.html#prerequisites) which contains all the details.
-
-If you do not start the zkSync local environment, the tests will fail with error `Error: could not detect network (event="noNetwork", code=NETWORK_ERROR, version=providers/5.7.2)`
 
 ## Official Links
 
-- [Website](https://zksync.io/)
-- [Documentation](https://v2-docs.zksync.io/dev/)
-- [GitHub](https://github.com/matter-labs)
-- [Twitter](https://twitter.com/zksync)
-- [Discord](https://discord.gg/nMaPGrDDwk)
+- [Website](https://bootnode.dev/)
+- [GitHub](https://github.com/BootNodeDev/dead-entity-switch)
